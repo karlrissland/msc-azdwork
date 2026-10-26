@@ -1,0 +1,24 @@
+name: msc-azdwork
+requiredVersions:
+  azd: ">= 1.36.0"
+infra:
+  provider: terraform
+  path: infra
+services:
+  web:
+    host: containerapp
+    image: ${SERVICE_WEB_IMAGE:-mcr.microsoft.com/azuredocs/containerapps-helloworld:latest}
+    docker:
+      imagePassthrough: true
+hooks:
+  preprovision:
+    shell: pwsh
+    run: ./scripts/preprovision.ps1
+  predeploy:
+    shell: pwsh
+    run: ./scripts/build-on-jumpbox.ps1
+workflows:
+  up:
+    steps:
+      - azd: provision
+      - azd: deploy --all
